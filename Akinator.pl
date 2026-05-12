@@ -52,7 +52,7 @@ personaje(minnie_mouse, [femenino, es_animal, es_disney_clasico, es_protagonista
 personaje(donald_duck, [masculino, es_animal, es_disney_clasico, es_protagonista, es_ave, es_pato, camina_en_dos_patas, usa_ropa, usa_traje_de_marinero, no_usa_pantalones]).
 personaje(daisy_duck, [femenino, es_animal, es_disney_clasico, es_protagonista, es_ave, es_pato, camina_en_dos_patas, usa_ropa, usa_zapatos_de_tacon, usa_mono_lila]).
 personaje(goofy, [masculino, es_animal, es_disney_clasico, es_protagonista, es_perro, camina_en_dos_patas, usa_ropa, usa_sombrero_verde, es_torpe]).
-personaje(pluto, [masculino, es_animal, es_disney_clasico, es_mascota_o_compinche, es_perro, camina_en_cuatro_patas, no_usa_ropa, no_habla, mascota_de_mickey]).
+personaje(pluto, [masculino, es_animal, es_disney_clasico, es_mascota, es_perro, camina_en_cuatro_patas, no_usa_ropa, no_habla, mascota_de_mickey]).
 
 
 personaje(lady, [femenino, es_animal, es_disney_clasico, es_protagonista, es_perro, camina_en_cuatro_patas, tiene_collar_azul, de_raza_cocker, come_espagueti]).
@@ -76,7 +76,7 @@ personaje(baloo, [masculino, es_animal, es_disney_clasico, es_protagonista, es_o
 personaje(bagheera, [masculino, es_animal, es_disney_clasico, es_secundario, es_felino, es_pantera, camina_en_cuatro_patas, es_negro, vive_en_la_selva, es_serio]).
 
 
-personaje(bambi, [masculino, es_animal, es_disney_clasico, es_protagonista, es_ciervo, camina_en_cuatro_patas, pierde_a_su_madre, es_principe_del_bosque]).
+personaje(bambi, [masculino, es_animal, es_disney_clasico, es_protagonista, es_venado, camina_en_cuatro_patas, pierde_a_su_madre, es_principe_del_bosque]).
 personaje(thumper, [masculino, es_animal, es_disney_clasico, es_secundario, es_conejo, camina_en_cuatro_patas, golpea_el_pie, amigo_de_bambi]).
 personaje(flower, [masculino, es_animal, es_disney_clasico, es_secundario, es_zorillo, camina_en_cuatro_patas, es_timido, amigo_de_bambi]).
 personaje(robin_hood, [masculino, es_animal, es_disney_clasico, es_protagonista, es_zorro, camina_en_dos_patas, usa_ropa, roba_a_los_ricos, usa_arco_y_flecha]).
