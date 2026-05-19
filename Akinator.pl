@@ -107,7 +107,7 @@ personaje(boys_trillizos, [es_masculino, es_animal, es_3d, es_secundario, es_un_
 % ==========================================
 personaje(doc, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, tiene_barba, usa_lentes, usa_ropa_naranja, usa_sombrero_cafe, es_el_lider]).
 personaje(dopey, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, usa_sombrero_morado, usa_ropa_verde, su_ropa_le_queda_grande, es_mudo]). 
-personaje(grumpy, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, siempre_esta_enojado, usa_tuniva_roja]).
+personaje(grumpy, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, siempre_esta_enojado, usa_tunica_roja]).
 personaje(happy, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, siempre_esta_alegre, es_gordito]).
 personaje(sleepy, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, siempre_tiene_sueno, tiene_parpados_caidos]).
 personaje(bashful, [es_masculino, es_fantasia, es_2d, es_secundario, es_enano, es_muy_timido, se_sonroja]).
@@ -161,7 +161,6 @@ personaje(mrs_potts, [es_femenino, es_objeto, es_2d, es_secundario, es_vajilla, 
 % Punto de entrada. Escribe "adivinar." en la consola para iniciar.
 adivinar :-
     limpiar_respuestas,
-    % Extrae dinámicamente todos los personajes definidos en tu base de hechos
     findall(P, personaje(P, _), ListaCompleta),
     (   ListaCompleta \= [] 
     ->  buscar(ListaCompleta)
@@ -172,35 +171,28 @@ adivinar :-
 buscar([Personaje]) :-
     write('¡Lo tengo! El personaje en el que estas pensando es: '),
     write(Personaje), nl.
-
-% Caso base 2: Fracaso. La lista se quedó vacía.
 buscar([]) :-
     write('Me rindo. No pude identificar al personaje o tus respuestas se contradicen.'), nl.
-
-% Caso recursivo: Hay más de un candidato, iteramos.
 buscar(Lista) :-
     Lista = [_,_|_], % Asegura que haya al menos dos elementos para comparar
     obtener_caracteristica_util(Lista, C),
     preguntar(C),
     filtrar_personajes(Lista, C, NuevaLista),
     buscar(NuevaLista).
-
-% Caso de seguridad: Si hay varios personajes pero no quedan preguntas útiles (tienen los mismos atributos).
-buscar(Lista) :-
     Lista = [_,_|_],
     write('No tengo mas preguntas para diferenciarlos. Podria ser alguno de estos: '), nl,
     write(Lista), nl.
 
-% ==========================================
+
 % LÓGICA DE SELECCIÓN DE PREGUNTAS
 % ==========================================
 
-% Encuentra una característica que no se haya preguntado y que divida a los candidatos actuales
+
 obtener_caracteristica_util(Lista, C) :-
     member(A, Lista),
     personaje(A, Caracteristicas),
     member(C, Caracteristicas),
-    \+ respuesta(C, _), % \+ es el operador estándar de negación en Prolog moderno
+    \+ respuesta(C, _), S
     sirve_para_dividir(Lista, C),
     !.
 
@@ -219,17 +211,21 @@ no_aparece_en_algunos(Lista, C) :-
     personaje(A, L),
     \+ member(C, L), !.
 
-% ==========================================
+
 % INTERACCIÓN CON EL USUARIO Y FILTROS
 % ==========================================
+% Convierte los guiones bajos en espacios para imprimir bonito
+imprimir_limpio(Caracteristica) :-
+    atomic_list_concat(Palabras, '_', Caracteristica),
+    atomic_list_concat(Palabras, ' ', FraseLimpia),
+    write(FraseLimpia).
 
 % Manejo de la pregunta al usuario en consola
 preguntar(C) :-
     write('¿Tu personaje '),
-    write(C),
+    imprimir_limpio(C), 
     write('? (si/no): '),
     read(R),
-    % Validación para evitar que el programa truene por un "yes" o un error de dedo
     (   (R == si ; R == no)
     ->  assertz(respuesta(C, R))
     ;   write('Por favor, responde unicamente "si." o "no." (sin olvidar el punto final).'), nl,
