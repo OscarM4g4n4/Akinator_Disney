@@ -8,6 +8,8 @@ personaje(cenicienta, [es_femenino, es_humano, es_2d, es_protagonista, es_prince
 personaje(aurora, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_europa, es_realeza_de_nacimiento, convive_con_magia, cae_en_sueno_profundo, es_rubia]).
 personaje(pocahontas, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_america, es_realeza_de_nacimiento, tiene_historia_realista, es_nativa_americana, habla_con_la_naturaleza]).
 personaje(tiana, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_america, es_plebeya_original, convive_con_magia, es_afroamericana, es_de_nueva_orleans, cocina_bien]).
+personaje(jasmine, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_arabia, es_realeza_de_nacimiento, convive_con_magia, tiene_tigre_mascota, usa_pantalones]).
+personaje(bella, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_francia, es_plebeya_original, convive_con_magia, le_gusta_leer, usa_vestido_amarillo]).
 
 personaje(mulan, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_asia, es_plebeya_original, tiene_historia_realista, es_guerrera, se_hace_pasar_por_hombre, usa_espada]).
 personaje(esmeralda, [es_femenino, es_humano, es_2d, es_secundario, es_gitana, baila, tiene_cabra_mascota]).
@@ -52,7 +54,7 @@ personaje(felix, [es_masculino, es_humano, es_3d, es_secundario, es_personaje_de
 personaje(mickey_mouse, [es_masculino, es_animal, es_2d, es_protagonista, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_raton, usa_guantes_blancos, usa_pantalones_rojos]).
 personaje(minnie_mouse, [es_femenino, es_animal, es_2d, es_protagonista, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_raton, usa_vestido_a_lunares, usa_mono_en_la_cabeza]).
 personaje(donald_duck, [es_masculino, es_animal, es_2d, es_protagonista, es_ave, es_terrestre, camina_en_dos_patas, usa_ropa, es_pato, usa_traje_de_marinero, no_usa_pantalones]).
-personaje(daisy_duck, [es_femenino, es_animal, es_2d, es_protagonista, es_ave, es_terrestre, camina_en_dos_patas, usa_ropa, es_pato, usa_zapatos_de_tacon, usa_mono_lila]).
+personaje(daisy_duck, [es_femenino, es_animal, es_2d, es_secundario, es_ave, es_terrestre, camina_en_dos_patas, usa_ropa, es_pato, usa_zapatos_de_tacon, usa_mono_lila]).
 personaje(goofy, [es_masculino, es_animal, es_2d, es_protagonista, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_perro, usa_sombrero_verde, es_torpe]).
 personaje(robin_hood, [es_masculino, es_animal, es_2d, es_protagonista, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_zorro, roba_a_los_ricos, usa_arco_y_flecha]).
 personaje(maid_marian, [es_femenino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_zorro, es_realeza, usa_velo]).
@@ -66,6 +68,7 @@ personaje(dutchess, [es_femenino, es_animal, es_2d, es_protagonista, es_mamifero
 personaje(o_malley, [es_masculino, es_animal, es_2d, es_protagonista, es_mamifero, es_terrestre, camina_en_cuatro_patas, es_callejero, es_felino, es_gato, es_naranja, es_de_paris]).
 personaje(berlioz, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_cuatro_patas, tiene_dueno, es_felino, es_gato, es_negro_o_cafe, toca_el_piano]).
 personaje(toulouse, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_cuatro_patas, tiene_dueno, es_felino, es_gato, es_naranja, pinta_cuadros]).
+personaje(marie, [es_femenino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_cuatro_patas, tiene_dueno, es_felino, es_gato, es_blanca, usa_mono_rosa, es_hija_de_dutchess]).
 
 % GRUPO: Viven en la naturaleza (Selva, Sabana, Bosque)
 personaje(simba, [es_masculino, es_animal, es_2d, es_protagonista, es_mamifero, es_terrestre, camina_en_cuatro_patas, vive_en_la_sabana, es_felino, es_leon, es_de_africa, es_realeza]).
@@ -179,6 +182,8 @@ buscar(Lista) :-
     preguntar(C),
     filtrar_personajes(Lista, C, NuevaLista),
     buscar(NuevaLista).
+    
+    buscar(Lista) :-
     Lista = [_,_|_],
     write('No tengo mas preguntas para diferenciarlos. Podria ser alguno de estos: '), nl,
     write(Lista), nl.
@@ -192,7 +197,7 @@ obtener_caracteristica_util(Lista, C) :-
     member(A, Lista),
     personaje(A, Caracteristicas),
     member(C, Caracteristicas),
-    \+ respuesta(C, _), S
+    \+ respuesta(C, _), 
     sirve_para_dividir(Lista, C),
     !.
 
