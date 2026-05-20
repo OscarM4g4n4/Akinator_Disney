@@ -114,13 +114,13 @@ personaje(eeyore, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, e
 personaje(rabbit, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_dos_patas, vive_en_el_bosque, es_conejo, es_grunon, tiene_un_huerto]).
 
 % OTROS INCLASIFICABLES (Acuáticos, insectos, roedores con ropa de Cenicienta)
+personaje(sebastian, [es_masculino, es_animal, es_2d, es_secundario, es_crustaceo, es_acuatico, camina_en_cuatro_patas, vive_bajo_el_mar, es_cangrejo, es_de_jamaica, es_musico_real]).
 personaje(jaq, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_raton, usa_chaqueta_roja, es_amigo_de_cenicienta]).
 personaje(gus, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_raton, es_gordito, usa_camiseta_verde, es_amigo_de_cenicienta]).
 personaje(white_rabbit, [es_masculino, es_animal, es_2d, es_secundario, es_mamifero, es_terrestre, camina_en_dos_patas, usa_ropa, es_conejo, llega_tarde, lleva_reloj_de_bolsillo]).
 personaje(jiminy_cricket, [es_masculino, es_animal, es_2d, es_secundario, es_insecto, es_terrestre, camina_en_dos_patas, usa_ropa, es_grillo, es_la_conciencia_de_pinocho, usa_paraguas]).
 personaje(ray, [es_masculino, es_animal, es_2d, es_secundario, es_insecto, es_aereo, vuela, es_luciernaga, es_de_nueva_orleans, esta_enamorado_de_una_estrella]).
 personaje(flounder, [es_masculino, es_animal, es_2d, es_secundario, es_pez, es_acuatico, sabe_nadar, vive_bajo_el_mar, es_amigo_de_ariel, es_amarillo_y_azul]).
-personaje(sebastian, [es_masculino, es_animal, es_2d, es_secundario, es_crustaceo, es_acuatico, camina_en_cuatro_patas, vive_bajo_el_mar, es_cangrejo, es_de_jamaica, es_musico_real]).
 personaje(scuttle, [es_masculino, es_animal, es_2d, es_secundario, es_ave, es_aereo, vuela, es_gaviota, inventa_nombres_de_cosas_humanas]).
 
 personaje(louis, [es_masculino, es_animal, es_2d, es_secundario, es_reptil, es_acuatico, camina_en_dos_patas, es_cocodrilo, es_de_nueva_orleans, toca_la_trompeta]).
