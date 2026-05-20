@@ -31,7 +31,7 @@ personaje(aurora, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, 
 personaje(pocahontas, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_america, es_realeza_de_nacimiento, tiene_historia_realista, es_nativa_americana, habla_con_la_naturaleza]).
 personaje(tiana, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_america, es_plebeya_original, convive_con_magia, es_afroamericana, es_de_nueva_orleans ]).
 personaje(jasmine, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_arabia, es_realeza_de_nacimiento, convive_con_magia, tiene_tigre_mascota]).
-personaje(bella, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_francia, es_plebeya_original, convive_con_magia, le_gusta_leer, usa_vestido_amarillo]).
+personaje(bella, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_europa, es_plebeya_original, convive_con_magia, le_gusta_leer, usa_vestido_amarillo]).
 
 personaje(mulan, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_asia, es_plebeya_original, tiene_historia_realista, es_guerrera, se_hace_pasar_por_hombre, usa_espada]).
 personaje(esmeralda, [es_femenino, es_humano, es_2d, es_secundario, es_gitana, baila, tiene_cabra_mascota]).
