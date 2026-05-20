@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akinator Disney</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 500px; width: 100%; }
+        h1 { color: #38bdf8; margin-bottom: 30px; }
+        .pregunta { font-size: 24px; margin-bottom: 40px; min-height: 60px; }
+        .botones { display: flex; gap: 20px; justify-content: center; }
+        button { padding: 15px 40px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: transform 0.2s; }
+        button:hover { transform: scale(1.05); }
+        .btn-si { background-color: #22c55e; color: white; }
+        .btn-no { background-color: #ef4444; color: white; }
+        .debug { margin-top: 30px; font-size: 12px; color: #94a3b8; text-align: left; background: #0f172a; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Akinator Disney</h1>
+        
+        <div class="pregunta" id="texto-pregunta">Conectando con el motor Prolog...</div>
+        
+        <div class="botones" id="contenedor-botones">
+            <button class="btn-si" onclick="enviarRespuesta('si')">Sí</button>
+            <button class="btn-no" onclick="enviarRespuesta('no')">No</button>
+        </div>
+
+        <div class="debug" id="consola-debug">Historial: {}</div>
+    </div>
+
+    <script>
+        // Esta es la "memoria" del navegador. Empieza vacía.
+        let historialRespuestas = {};
+        let caracteristicaActual = "";
+
+        // Formatea "es_de_europa" a "es de europa"
+        function formatearTexto(texto) {
+            return texto.split('_').join(' ');
+        }
+
+        // Función principal que se comunica con tu Prolog
+        async function hacerJugada() {
+            try {
+                // Hacemos el POST al servidor local de Prolog
+                const response = await fetch('/jugar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(historialRespuestas)
+                });
+
+                const data = await response.json();
+                
+                // Evaluamos lo que respondió Prolog
+                if (data.estado === "jugando") {
+                    caracteristicaActual = data.pregunta;
+                    document.getElementById('texto-pregunta').innerText = `¿Tu personaje ${formatearTexto(data.pregunta)}?`;
+                } 
+                else if (data.estado === "victoria") {
+                    document.getElementById('texto-pregunta').innerHTML = `¡Lo tengo!<br><span style="color:#fbbf24; font-size: 32px; display:block; margin-top:15px;">${formatearTexto(data.personaje).toUpperCase()}</span>`;
+                    document.getElementById('contenedor-botones').style.display = 'none';
+                }
+                else {
+                    document.getElementById('texto-pregunta').innerText = data.mensaje;
+                    document.getElementById('contenedor-botones').style.display = 'none';
+                }
+
+                // Actualizamos el debugger visual
+                document.getElementById('consola-debug').innerText = "Historial: " + JSON.stringify(historialRespuestas);
+
+            } catch (error) {
+                document.getElementById('texto-pregunta').innerText = "Error: El servidor Prolog no está corriendo.";
+                console.error(error);
+            }
+        }
+
+        // Función que se ejecuta al presionar los botones
+        function enviarRespuesta(respuesta) {
+            // Guardamos la respuesta en la memoria de JS
+            historialRespuestas[caracteristicaActual] = respuesta;
+            // Pedimos la siguiente jugada
+            hacerJugada();
+        }
+
+        // Iniciar el juego al cargar la página
+        hacerJugada();
+    </script>
+</body>
+</html>

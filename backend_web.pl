@@ -1,7 +1,29 @@
-% Declaración para manejar la memoria temporal de las respuestas en tiempo de ejecución
-:- dynamic respuesta/2.
+%% ==========================================
+% SERVIDOR WEB AKINATOR DISNEY
+% ==========================================
 
-% HUMANOS
+:- use_module(library(http/thread_httpd)).
+:- use_module(library(http/http_dispatch)).
+:- use_module(library(http/http_json)).
+ 
+% 1. Ruta para tu Interfaz Gráfica (El Frontend)
+:- http_handler(root(.), servir_front, []).
+
+% 2. Ruta para tu API (El Backend)
+:- http_handler(root(jugar), manejar_jugada, []).
+
+% Arrancar servidor
+% Arrancador adaptado para Render y Local
+arrancar :-
+    ( getenv('PORT', PortAtom) -> atom_number(PortAtom, Port) ; Port = 8000 ),
+    http_server(http_dispatch, [port(Port)]).
+
+% Función que lee tu index.html y se lo manda al navegador
+servir_front(Request) :-
+    http_reply_file('index.html', [], Request).
+
+% ==========================================
+% BASE DE HECHOS (AQUÍ PEGA TUS 120 PERSONAJES)
 % ==========================================
 personaje(blanca_nieves, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_europa, es_realeza_de_nacimiento, convive_con_magia, come_manzana_envenenada, convive_con_enanos]).
 personaje(cenicienta, [es_femenino, es_humano, es_2d, es_protagonista, es_princesa, es_de_europa, es_plebeya_original, convive_con_magia, pierde_zapatilla, tiene_madrastra]).
@@ -157,111 +179,94 @@ personaje(cogsworth, [es_masculino, es_objeto, es_2d, es_secundario, es_reloj, e
 personaje(lumiere, [es_masculino, es_objeto, es_2d, es_secundario, es_candelabro, tiene_velas, es_frances]).
 personaje(mrs_potts, [es_femenino, es_objeto, es_2d, es_secundario, es_vajilla, es_tetera, tiene_un_hijo_taza, sirve_te]).
 
-% ==========================================
-% MOTOR PRINCIPAL
+
+% LÓGICA DE CONTROL (EL "CEREBRO" WEB)
 % ==========================================
 
-% Punto de entrada. Escribe "adivinar." en la consola para iniciar.
-adivinar :-
-    limpiar_respuestas,
-    findall(P, personaje(P, _), ListaCompleta),
-    (   ListaCompleta \= [] 
-    ->  buscar(ListaCompleta)
-    ;   write('Error: No hay personajes en la base de datos.'), nl
+% 1. Interceptamos el chequeo de seguridad (CORS Preflight - OPTIONS)
+manejar_jugada(Request) :-
+    member(method(options), Request), !,
+    % Escribimos las cabeceras a mano directo en el flujo HTTP
+    format('Access-Control-Allow-Origin: *~n'),
+    format('Access-Control-Allow-Methods: POST, OPTIONS~n'),
+    format('Access-Control-Allow-Headers: Content-Type~n'),
+    format('Content-type: text/plain~n~n').
+
+% 2. Manejamos la petición POST real con el JSON de tu juego
+manejar_jugada(Request) :-
+    http_read_json_dict(Request, HistorialRespuestas),
+    
+    findall(P, personaje(P, _), UniversoCompleto),
+    filtrar_estado_actual(UniversoCompleto, HistorialRespuestas, Sobrevivientes),
+    
+    evaluar_estado_juego(Sobrevivientes, HistorialRespuestas, RespuestaSalida),
+    
+    % LA MAGIA: Forzamos la cabecera directamente en la respuesta JSON
+    reply_json(RespuestaSalida, [headers(['Access-Control-Allow-Origin'='*'])]).
+    
+% --- ESTADOS DEL JUEGO ---
+
+% Caso 1: ¡Ganamos! Queda un solo personaje.
+evaluar_estado_juego([Personaje], _Historial, _{estado: "victoria", personaje: Personaje}).
+
+% Caso 2: Fracaso. La lista quedó vacía.
+evaluar_estado_juego([], _Historial, _{estado: "fracaso", mensaje: "No encontre al personaje."}).
+
+% Caso 3: Juego en curso. Quedan varios, buscar siguiente pregunta.
+evaluar_estado_juego(Sobrevivientes, HistorialRespuestas, Respuesta) :-
+    Sobrevivientes = [_,_|_], % Asegura mínimo 2
+    (   obtener_caracteristica_util(Sobrevivientes, HistorialRespuestas, SiguienteC)
+    ->  Respuesta = _{estado: "jugando", pregunta: SiguienteC, candidatos_restantes: Sobrevivientes}
+    ;   Respuesta = _{estado: "empate", posibles: Sobrevivientes, mensaje: "Se acabaron las preguntas utiles."}
     ).
 
-% Caso base 1: Éxito. Solo queda un candidato en la lista.
-buscar([Personaje]) :-
-    write('¡Lo tengo! El personaje en el que estas pensando es: '),
-    write(Personaje), nl.
-buscar([]) :-
-    write('Me rindo. No pude identificar al personaje o tus respuestas se contradicen.'), nl.
-buscar(Lista) :-
-    Lista = [_,_|_], % Asegura que haya al menos dos elementos para comparar
-    obtener_caracteristica_util(Lista, C),
-    preguntar(C),
-    filtrar_personajes(Lista, C, NuevaLista),
-    buscar(NuevaLista).
-    
-    buscar(Lista) :-
-    Lista = [_,_|_],
-    write('No tengo mas preguntas para diferenciarlos. Podria ser alguno de estos: '), nl,
-    write(Lista), nl.
+% ==========================================
+% ALGORITMO DE FILTRADO SIN ESTADO (STATELESS)
+% ==========================================
+% Estos filtros ya no usan 'assertz', leen el diccionario que mandó el navegador.
 
+filtrar_estado_actual(Lista, Historial, ListaFiltrada) :-
+    dict_pairs(Historial, _, Pares), % Convierte el JSON {"es_humano":"si"} a pares C-R
+    aplicar_filtros(Lista, Pares, ListaFiltrada).
 
-% LÓGICA DE SELECCIÓN DE PREGUNTAS
+aplicar_filtros(L, [], L). % Sin filtros, lista intacta
+aplicar_filtros(ListaEntrada, [Carac-Resp|RestoPares], ListaFinal) :-
+    filtrar_por_rasgo(ListaEntrada, Carac, Resp, ListaParcial),
+    aplicar_filtros(ListaParcial, RestoPares, ListaFinal).
+
+% Si el usuario dijo "si", conserva a los que la tengan.
+filtrar_por_rasgo([], _, _, []).
+filtrar_por_rasgo([P|Resto], C, "si", [P|RestoFiltrado]) :-
+    personaje(P, L), member(C, L), !,
+    filtrar_por_rasgo(Resto, C, "si", RestoFiltrado).
+
+% Si el usuario dijo "no", conserva a los que NO la tengan.
+filtrar_por_rasgo([P|Resto], C, "no", [P|RestoFiltrado]) :-
+    personaje(P, L), \+ member(C, L), !,
+    filtrar_por_rasgo(Resto, C, "no", RestoFiltrado).
+
+% Descarte: si no cumple el 'si' o el 'no', se borra de la lista.
+filtrar_por_rasgo([_|Resto], C, R, RestoFiltrado) :-
+    filtrar_por_rasgo(Resto, C, R, RestoFiltrado).
+
+% ==========================================
+% INTELIGENCIA: SELECCIÓN DE PREGUNTA
 % ==========================================
 
-
-obtener_caracteristica_util(Lista, C) :-
+obtener_caracteristica_util(Lista, Historial, C) :-
     member(A, Lista),
     personaje(A, Caracteristicas),
     member(C, Caracteristicas),
-    \+ respuesta(C, _), 
+    \+ get_dict(C, Historial, _), % Verifica que esta 'C' no este ya en el JSON del historial
     sirve_para_dividir(Lista, C),
     !.
 
-% Verifica que la característica exista en algunos personajes de la lista, pero no en todos
 sirve_para_dividir(Lista, C) :-
     aparece_en_algunos(Lista, C),
     no_aparece_en_algunos(Lista, C).
 
 aparece_en_algunos(Lista, C) :-
-    member(A, Lista),
-    personaje(A, L),
-    member(C, L), !.
+    member(A, Lista), personaje(A, L), member(C, L), !.
 
 no_aparece_en_algunos(Lista, C) :-
-    member(A, Lista),
-    personaje(A, L),
-    \+ member(C, L), !.
-
-
-% INTERACCIÓN CON EL USUARIO Y FILTROS
-% ==========================================
-% Convierte los guiones bajos en espacios para imprimir bonito
-imprimir_limpio(Caracteristica) :-
-    atomic_list_concat(Palabras, '_', Caracteristica),
-    atomic_list_concat(Palabras, ' ', FraseLimpia),
-    write(FraseLimpia).
-
-% Manejo de la pregunta al usuario en consola
-preguntar(C) :-
-    write('¿Tu personaje '),
-    imprimir_limpio(C), 
-    write('? (si/no): '),
-    read(R),
-    (   (R == si ; R == no)
-    ->  assertz(respuesta(C, R))
-    ;   write('Por favor, responde unicamente "si." o "no." (sin olvidar el punto final).'), nl,
-        preguntar(C)
-    ).
-
-% Caso base del filtro: lista vacía
-filtrar_personajes([], _, []).
-
-% Si el usuario dijo "si", conservamos al personaje en la lista si TIENE la característica
-filtrar_personajes([A|R], C, [A|R2]) :-
-    respuesta(C, si),
-    personaje(A, Lista),
-    member(C, Lista),
-    filtrar_personajes(R, C, R2).
-
-% Si el usuario dijo "no", conservamos al personaje en la lista si NO TIENE la característica
-filtrar_personajes([A|R], C, [A|R2]) :-
-    respuesta(C, no),
-    personaje(A, Lista),
-    \+ member(C, Lista),
-    filtrar_personajes(R, C, R2).
-
-% Descarte: Si el personaje no cumple la condición evaluada arriba, lo eliminamos de la nueva lista
-filtrar_personajes([_|R], C, R2) :-
-    filtrar_personajes(R, C, R2).
-
-% ==========================================
-% UTILIDADES
-% ==========================================
-
-% Limpia la base de datos temporal usando retractall (más limpio y eficiente que retract + fail)
-limpiar_respuestas :-
-    retractall(respuesta(_, _)). 
+    member(A, Lista), personaje(A, L), \+ member(C, L), !.
